@@ -25,7 +25,7 @@ func dbde() gorm.DB {
 }
 
 func main() {
-	rootCmd.AddCommand(starCmd, addCmd, listCmd)
+	rootCmd.AddCommand(starCmd, addCmd, listCmd, doneCmd)
 	err := rootCmd.Execute()
 	if err != nil {
 		panic(err)
@@ -64,19 +64,24 @@ var addCmd = &cobra.Command{
 	},
 }
 
+var doneCmd = &cobra.Command{
+	Use: "done",
+	Run: func(cmd *cobra.Command, args []string) {
+		fmt.Println("agha salam")
+		db := dbde()
+		title := args[0]
+		db.Model(&Star{}).Where("taskname", title).Update("status", true)
+	},
+}
+
 var listCmd = &cobra.Command{
 	Use: "list",
 	Run: func(cmd *cobra.Command, args []string) {
 		db := dbde()
 		var records []Star
 		db.Find(&records)
-		// ir := 9
-		// it := 9
-		for i, _ := range records {
-			// fmt.Println(i)
-			fmt.Printf("task %v  is %v and the star of that is %v \n", records[i].Taskname, records[i].Status, records[i].Stars)
-			// fmt.Println(i, records[i].Taskname)
-			// fmt.Println(i, records[i].Status)
+		for i := range records {
+			fmt.Printf("task: %v -------- status : %v ------- stars: %v \n", records[i].Taskname, records[i].Status, records[i].Stars)
 		}
 	},
 }

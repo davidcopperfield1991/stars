@@ -25,7 +25,7 @@ func dbde() gorm.DB {
 }
 
 func main() {
-	rootCmd.AddCommand(starCmd, addCmd, listCmd, doneCmd, helpCmd)
+	rootCmd.AddCommand(starCmd, addCmd, listCmd, doneCmd, deleteCmd, helpCmd)
 	err := rootCmd.Execute()
 	if err != nil {
 		panic(err)
@@ -74,6 +74,15 @@ var doneCmd = &cobra.Command{
 	},
 }
 
+var deleteCmd = &cobra.Command{
+	Use: "delete",
+	Run: func(cmd *cobra.Command, args []string) {
+		db := dbde()
+		title := args[0]
+		db.Model(&Star{}).Where("taskname", title).Delete(&Star{})
+	},
+}
+
 var listCmd = &cobra.Command{
 	Use: "list",
 	Run: func(cmd *cobra.Command, args []string) {
@@ -89,6 +98,6 @@ var listCmd = &cobra.Command{
 var helpCmd = &cobra.Command{
 	Use: "help",
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("star : this command with task name add one star to task \nadd : this command with task name add task to DB  \ndone : this command with task name change statuse of task to true \nlist: this command show DB rows")
+		fmt.Println("star : this command with task name and nimber of star you want to give add one star to task \nadd : this command with task name add task to DB  \ndone : this command with task name change statuse of task to true \nlist: this command show DB rows \ndelete: this command with task name delete task from DB")
 	},
 }

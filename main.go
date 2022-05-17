@@ -25,7 +25,7 @@ func dbde() gorm.DB {
 }
 
 func main() {
-	rootCmd.AddCommand(starCmd, addCmd, listCmd, doneCmd)
+	rootCmd.AddCommand(starCmd, addCmd, listCmd, doneCmd, helpCmd)
 	err := rootCmd.Execute()
 	if err != nil {
 		panic(err)
@@ -83,5 +83,12 @@ var listCmd = &cobra.Command{
 		for i := range records {
 			fmt.Printf("task: %v -------- status : %v ------- stars: %v \n", records[i].Taskname, records[i].Status, records[i].Stars)
 		}
+	},
+}
+
+var helpCmd = &cobra.Command{
+	Use: "help",
+	Run: func(cmd *cobra.Command, args []string) {
+		fmt.Println("star : this command with task name add one star to task \nadd : this command with task name add task to DB  \ndone : this command with task name change statuse of task to true \nlist: this command show DB rows")
 	},
 }

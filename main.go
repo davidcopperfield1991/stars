@@ -125,11 +125,11 @@ var todayCmd = &cobra.Command{
 		time := string(runes[0:10])
 		az := time + " 00:00:00"
 		ta := time + " 23:59:59"
-		var motaghayer []Star
+		var motaghayer []Dailystar
 		db.Where("created_at BETWEEN ? AND ?", az, ta).Find(&motaghayer)
 		total := 0
 		for i := range motaghayer {
-			fmt.Printf("task: %v -------- status : %v ------- stars: %v \n", motaghayer[i].Taskname, motaghayer[i].Status, motaghayer[i].Stars)
+			fmt.Printf("task: %v --------------- stars: %v \n", motaghayer[i].Taskname, motaghayer[i].Stars)
 			total += motaghayer[i].Stars
 		}
 		fmt.Printf("today star : %v \n", total)

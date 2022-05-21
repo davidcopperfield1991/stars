@@ -5,10 +5,9 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/spf13/cobra"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
-
-	"github.com/spf13/cobra"
 )
 
 type Star struct {
@@ -39,7 +38,7 @@ func dbdaily() gorm.DB {
 }
 
 func main() {
-	rootCmd.AddCommand(starCmd, addCmd, listCmd, doneCmd, deleteCmd, helpCmd, todayCmd)
+	rootCmd.AddCommand(starCmd, addCmd, listCmd, doneCmd, deleteCmd, helpCmd, todayCmd, tomatoCmd)
 	err := rootCmd.Execute()
 	if err != nil {
 		panic(err)
@@ -133,6 +132,19 @@ var todayCmd = &cobra.Command{
 			total += motaghayer[i].Stars
 		}
 		fmt.Printf("today star : %v \n", total)
+	},
+}
+
+var tomatoCmd = &cobra.Command{
+	Use: "tomato",
+	Run: func(cmd *cobra.Command, args []string) {
+		for i := 1; i < 25; i++ {
+			fmt.Println(i)
+			time.Sleep(1 * time.Minute)
+			dt := time.Now()
+			fmt.Println(dt)
+		}
+		fmt.Println("tomato sauce is ready.")
 	},
 }
 

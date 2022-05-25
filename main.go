@@ -103,6 +103,21 @@ var deleteCmd = &cobra.Command{
 	},
 }
 
+func khateFasele(s int) string {
+	b := ""
+	for i := 1; i < s; i++ {
+		b += "-"
+	}
+	return b
+}
+
+func beauty(n string, s bool, se int) int {
+	ln := len(n)
+	lz := 30 - ln
+	mohtawa, _ := fmt.Printf("task: %v %v status : %v ------- stars: %v  \n", n, khateFasele(lz), s, se)
+	return mohtawa
+}
+
 var listCmd = &cobra.Command{
 	Use: "list",
 	Run: func(cmd *cobra.Command, args []string) {
@@ -110,7 +125,7 @@ var listCmd = &cobra.Command{
 		var records []Star
 		db.Find(&records)
 		for i := range records {
-			fmt.Printf("task: %v -------- status : %v ------- stars: %v \n", records[i].Taskname, records[i].Status, records[i].Stars)
+			beauty(records[i].Taskname, records[i].Status, records[i].Stars)
 		}
 	},
 }

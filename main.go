@@ -38,7 +38,7 @@ func dbdaily() gorm.DB {
 }
 
 func main() {
-	rootCmd.AddCommand(starCmd, addCmd, listCmd, doneCmd, deleteCmd, helpCmd, todayCmd, tomatoCmd)
+	rootCmd.AddCommand(starCmd, addCmd, listCmd, doneCmd, deleteCmd, helpCmd, todayCmd, tomatoCmd, reportCmd)
 	err := rootCmd.Execute()
 	if err != nil {
 		panic(err)
@@ -160,6 +160,33 @@ var tomatoCmd = &cobra.Command{
 			fmt.Println(dt)
 		}
 		fmt.Println("tomato sauce is ready.")
+	},
+}
+
+var reportCmd = &cobra.Command{
+	Use: "report",
+	Run: func(cmd *cobra.Command, args []string) {
+		days, _ := strconv.Atoi(args[0])
+		db := dbdaily()
+		dt := time.Now().AddDate(0, 0, -days)
+		dtt := time.Now()
+		runes := []rune(dt.String())
+		runest := []rune(dtt.String())
+		time := string(runes[0:10])
+		timet := string(runest[0:10])
+		// unikemikham := time.Now().AddDate(0, 0, -days)
+		az := time + " 00:00:00"
+		ta := timet + " 23:59:59"
+		fmt.Println(az)
+		fmt.Println(ta)
+		var motaghayer []Dailystar
+		db.Where("created_at BETWEEN ? AND ?", az, ta).Find(&motaghayer)
+		total := 0
+		for i := range motaghayer {
+			fmt.Printf("task: %v --------------- stars: %v \n", motaghayer[i].Taskname, motaghayer[i].Stars)
+			total += motaghayer[i].Stars
+		}
+		fmt.Printf("today star : %v \n", total)
 	},
 }
 

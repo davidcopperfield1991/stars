@@ -5,44 +5,25 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/davidcopperfield1991/stars/internal"
+	server "github.com/davidcopperfield1991/stars/server"
 	"github.com/spf13/cobra"
-	"gorm.io/driver/postgres"
-	"gorm.io/gorm"
 )
 
-type Star struct {
-	gorm.Model
-	Taskname string
-	Stars    int
-	Status   bool
-}
-
-type Dailystar struct {
-	gorm.Model
-	Taskname string
-	Stars    int
-}
-
-func dbde() gorm.DB {
-	dsn := "host=127.0.0.1 user=postgres password=admin dbname=star port=5432 sslmode=disable"
-	db, _ := gorm.Open(postgres.Open(dsn), &gorm.Config{})
-	db.AutoMigrate(&Star{})
-	return *db
-}
-
-func dbdaily() gorm.DB {
-	dsn := "host=127.0.0.1 user=postgres password=admin dbname=star port=5432 sslmode=disable"
-	db, _ := gorm.Open(postgres.Open(dsn), &gorm.Config{})
-	db.AutoMigrate(&Dailystar{})
-	return *db
-}
-
 func main() {
-	rootCmd.AddCommand(starCmd, addCmd, listCmd, doneCmd, deleteCmd, helpCmd, todayCmd, tomatoCmd, reportCmd)
+
+	rootCmd.AddCommand(starCmd, addCmd, listCmd, doneCmd, deleteCmd, helpCmd, todayCmd, tomatoCmd, reportCmd, serverCmd)
 	err := rootCmd.Execute()
 	if err != nil {
 		panic(err)
 	}
+}
+
+var serverCmd = &cobra.Command{
+	Use: "server",
+	Run: func(cmd *cobra.Command, args []string) {
+		server.Server()
+	},
 }
 
 var rootCmd = &cobra.Command{
@@ -50,12 +31,12 @@ var rootCmd = &cobra.Command{
 }
 
 func updateStar(taskname string, star int) {
-	db := dbde()
-	var records []Star
+	db := internal.Dbde()
+	var records []internal.Star
 	db.Where("taskname = ?", taskname).First(&records)
 	oldstar := records[0].Stars
 	give_ster := star + oldstar
-	db.Model(&Star{}).Where("taskname", taskname).Update("Stars", give_ster)
+	db.Model(&internal.Star{}).Where("taskname", taskname).Update("Stars", give_ster)
 
 }
 
@@ -64,8 +45,8 @@ var starCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		title := args[0]
 		star, _ := strconv.Atoi(args[1])
-		db := dbdaily()
-		db.Create((&Dailystar{Taskname: title, Stars: star}))
+		db := internal.Dbdaily()
+		db.Create((&internal.Dailystar{Taskname: title, Stars: star}))
 		updateStar(title, star)
 	},
 }
@@ -77,8 +58,8 @@ var addCmd = &cobra.Command{
 		for i, s := range args {
 			fmt.Println(i, s)
 		}
-		db := dbde()
-		db.Create(&Star{
+		db := internal.Dbde()
+		db.Create(&internal.Star{
 			Taskname: args[0],
 		})
 	},
@@ -88,18 +69,18 @@ var doneCmd = &cobra.Command{
 	Use: "done",
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Println("agha salam")
-		db := dbde()
+		db := internal.Dbde()
 		title := args[0]
-		db.Model(&Star{}).Where("taskname", title).Update("status", true)
+		db.Model(&internal.Star{}).Where("taskname", title).Update("status", true)
 	},
 }
 
 var deleteCmd = &cobra.Command{
 	Use: "delete",
 	Run: func(cmd *cobra.Command, args []string) {
-		db := dbde()
+		db := internal.Dbde()
 		title := args[0]
-		db.Model(&Star{}).Where("taskname", title).Delete(&Star{})
+		db.Model(&internal.Star{}).Where("taskname", title).Delete(&internal.Star{})
 	},
 }
 
@@ -121,8 +102,8 @@ func beauty(n string, s bool, se int) int {
 var listCmd = &cobra.Command{
 	Use: "list",
 	Run: func(cmd *cobra.Command, args []string) {
-		db := dbde()
-		var records []Star
+		db := internal.Dbde()
+		var records []internal.Star
 		db.Find(&records)
 		for i := range records {
 			beauty(records[i].Taskname, records[i].Status, records[i].Stars)
@@ -133,13 +114,13 @@ var listCmd = &cobra.Command{
 var todayCmd = &cobra.Command{
 	Use: "today",
 	Run: func(cmd *cobra.Command, args []string) {
-		db := dbdaily()
+		db := internal.Dbdaily()
 		dt := time.Now()
 		runes := []rune(dt.String())
 		time := string(runes[0:10])
 		az := time + " 00:00:00"
 		ta := time + " 23:59:59"
-		var motaghayer []Dailystar
+		var motaghayer []internal.Dailystar
 		db.Where("created_at BETWEEN ? AND ?", az, ta).Find(&motaghayer)
 		total := 0
 		for i := range motaghayer {
@@ -167,26 +148,8 @@ var reportCmd = &cobra.Command{
 	Use: "report",
 	Run: func(cmd *cobra.Command, args []string) {
 		days, _ := strconv.Atoi(args[0])
-		db := dbdaily()
-		dt := time.Now().AddDate(0, 0, -days)
-		dtt := time.Now()
-		runes := []rune(dt.String())
-		runest := []rune(dtt.String())
-		time := string(runes[0:10])
-		timet := string(runest[0:10])
-		// unikemikham := time.Now().AddDate(0, 0, -days)
-		az := time + " 00:00:00"
-		ta := timet + " 23:59:59"
-		fmt.Println(az)
-		fmt.Println(ta)
-		var motaghayer []Dailystar
-		db.Where("created_at BETWEEN ? AND ?", az, ta).Find(&motaghayer)
-		total := 0
-		for i := range motaghayer {
-			fmt.Printf("task: %v --------------- stars: %v \n", motaghayer[i].Taskname, motaghayer[i].Stars)
-			total += motaghayer[i].Stars
-		}
-		fmt.Printf("today star : %v \n", total)
+		internal.Report(days)
+
 	},
 }
 

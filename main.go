@@ -105,10 +105,22 @@ var listCmd = &cobra.Command{
 		db := internal.Dbde()
 		var records []internal.Star
 		db.Find(&records)
+		fmt.Println("records")
+		fmt.Println(records)
 		for i := range records {
 			beauty(records[i].Taskname, records[i].Status, records[i].Stars)
 		}
 	},
+}
+
+func calculateValues(rows []internal.Dailystar) map[string]int {
+	valueTotals := make(map[string]int)
+
+	for _, row := range rows {
+		valueTotals[row.Taskname] += row.Stars
+	}
+
+	return valueTotals
 }
 
 var todayCmd = &cobra.Command{
@@ -120,13 +132,21 @@ var todayCmd = &cobra.Command{
 		time := string(runes[0:10])
 		az := time + " 00:00:00"
 		ta := time + " 23:59:59"
-		var motaghayer []internal.Dailystar
-		db.Where("created_at BETWEEN ? AND ?", az, ta).Find(&motaghayer)
-		total := 0
-		for i := range motaghayer {
-			fmt.Printf("task: %v --------------- stars: %v \n", motaghayer[i].Taskname, motaghayer[i].Stars)
-			total += motaghayer[i].Stars
+		var records []internal.Dailystar
+
+		db.Where("created_at BETWEEN ? AND ?", az, ta).Find(&records)
+
+		counts := calculateValues(records)
+
+		fmt.Println("task star count:")
+		for key, count := range counts {
+			fmt.Printf("%s: %d\n", key, count)
 		}
+		total := 0
+		for i := range records {
+			total += records[i].Stars
+		}
+		fmt.Println("********today star***********")
 		fmt.Printf("today star : %v \n", total)
 	},
 }

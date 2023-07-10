@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"sort"
 	"strconv"
 	"time"
 
@@ -12,7 +13,7 @@ import (
 
 func main() {
 
-	rootCmd.AddCommand(starCmd, addCmd, listCmd, doneCmd, deleteCmd, helpCmd, todayCmd, tomatoCmd, reportCmd, serverCmd)
+	rootCmd.AddCommand(starCmd, addCmd, listCmd, doneCmd, deleteCmd, helpCmd, todayCmd, tomatoCmd, reportCmd, serverCmd, weekCmd)
 	err := rootCmd.Execute()
 	if err != nil {
 		panic(err)
@@ -147,6 +148,63 @@ var todayCmd = &cobra.Command{
 			total += records[i].Stars
 		}
 		fmt.Println("********today star***********")
+		fmt.Printf("today star : %v \n", total)
+	},
+}
+
+func calculateValuesweek(rows []internal.Dailystar) map[int]int {
+	valueTotals := make(map[int]int)
+
+	for _, row := range rows {
+		_, _, day := row.CreatedAt.Date()
+		valueTotals[day] += row.Stars
+	}
+
+	return valueTotals
+}
+
+var weekCmd = &cobra.Command{
+	Use: "week",
+	Run: func(cmd *cobra.Command, args []string) {
+		db := internal.Dbdaily()
+		dt := time.Now()
+		week := dt.Add(-168 * time.Hour)
+		runes := []rune(week.String())
+		mytime := string(runes[0:10])
+
+		runes2 := []rune(dt.String())
+		time2 := string(runes2[0:10])
+
+		az := mytime + " 00:00:00"
+		ta := time2 + " 23:59:59"
+		var records []internal.Dailystar
+
+		db.Where("created_at BETWEEN ? AND ?", az, ta).Find(&records)
+
+		counts := calculateValuesweek(records)
+
+		fmt.Println("task star count:")
+
+		result := make([]struct{ Key, Value int }, 0, len(counts))
+		for k, v := range counts {
+			result = append(result, struct{ Key, Value int }{k, v})
+		}
+
+		// Sort the slice by keys
+		sort.Slice(result, func(i, j int) bool {
+			return result[i].Key < result[j].Key
+		})
+
+		// Print the sorted key-value pairs
+		for _, pair := range result {
+			fmt.Printf("Key: %d, Value: %d\n", pair.Key, pair.Value)
+		}
+
+		total := 0
+		for i := range records {
+			total += records[i].Stars
+		}
+		fmt.Println("********this week star***********")
 		fmt.Printf("today star : %v \n", total)
 	},
 }

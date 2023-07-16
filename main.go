@@ -44,6 +44,8 @@ func updateStar(taskname string, star int) {
 var starCmd = &cobra.Command{
 	Use: "star",
 	Run: func(cmd *cobra.Command, args []string) {
+		dt := time.Now()
+		fmt.Println(dt)
 		title := args[0]
 		star, _ := strconv.Atoi(args[1])
 		db := internal.Dbdaily()
@@ -106,8 +108,6 @@ var listCmd = &cobra.Command{
 		db := internal.Dbde()
 		var records []internal.Star
 		db.Find(&records)
-		fmt.Println("records")
-		fmt.Println(records)
 		for i := range records {
 			beauty(records[i].Taskname, records[i].Status, records[i].Stars)
 		}

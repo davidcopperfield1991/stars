@@ -1,2 +1,2 @@
 # stars
-based on pomodoro technique
+based on pomodoro technique.
